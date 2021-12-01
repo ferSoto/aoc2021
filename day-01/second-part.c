@@ -6,7 +6,7 @@ int sumReadings(int readings[]) {
     return readings[0] + readings[1] + readings[2];
 }
 
-int sumNewReading(int old_readings[], int oldest_reading_position, int new_reading) {
+int sumNewReadings(int old_readings[], int oldest_reading_position, int new_reading) {
     return new_reading
         + old_readings[(oldest_reading_position + 1) % SAMPLE_SIZE]
         + old_readings[(oldest_reading_position + 2) % SAMPLE_SIZE];
@@ -22,7 +22,7 @@ int main() {
             readings[i % SAMPLE_SIZE] = n;
             continue;
         }
-        bigger_than_previous_count += (sumReadings(readings) < sumNewReading(readings, i, n));
+        bigger_than_previous_count += (sumReadings(readings) < sumNewReadings(readings, i, n));
         readings[i % SAMPLE_SIZE] = n;
     }
     printf("%d", bigger_than_previous_count);
