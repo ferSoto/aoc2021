@@ -1,13 +1,14 @@
+#include <functional>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 using namespace std;
 
-int calculateCo2Rating(vector<int> *readings, int msb) {
-  if (readings->size() == 1) {
-    return readings->at(0) & 1;
-  }
+typedef function<bool(int, int)> Comparator;
+
+tuple<vector<int>, vector<int>> splitByMsb(vector<int> *readings, int msb) {
   vector<int> ones;
   vector<int> zeros; 
   for (int reading : (*readings)) {
@@ -17,65 +18,30 @@ int calculateCo2Rating(vector<int> *readings, int msb) {
       zeros.push_back(reading);
     }
   }
-  if (zeros.size() <= ones.size()) {
-    if (!msb) {
-      return 0;
-    } 
-    return calculateCo2Rating(&zeros, msb - 1);
-  } else {
-    if (!msb) {
-      return 1;
-    } 
-    return (1 << msb) | calculateCo2Rating(&ones, msb - 1);
-  }
+  return {ones, zeros};
 }
 
-int calculateO2Rating(vector<int> *readings, int msb) {
+int calculateRating(vector<int> *readings, int msb, Comparator compare) {
+  vector<int> ones;
+  vector<int> zeros;
   if (readings->size() == 1) {
-    return readings->at(0) & 1;
-  }
-  vector<int> ones;
-  vector<int> zeros; 
-  for (int reading : (*readings)) {
-    if (reading & (1 << msb)) {
-      ones.push_back(reading);
-    } else {
-      zeros.push_back(reading);
+    if (msb) {
+      return (readings->at(0) & (1 << msb)) | calculateRating(readings, msb - 1, compare);
     }
-  }
-  if (zeros.size() > ones.size()) {
+    return readings->at(0) & 1;
+  } 
+  tie(ones, zeros) = splitByMsb(readings, msb);
+  if (compare(ones.size(), zeros.size())) {
     if (!msb) {
       return 0;
     } 
-    return calculateO2Rating(&zeros, msb - 1);
+    return calculateRating(&zeros, msb - 1, compare);
   } else {
     if (!msb) {
       return 1;
     } 
-    return (1 << msb) | calculateO2Rating(&ones, msb - 1);
+    return (1 << msb) | calculateRating(&ones, msb - 1, compare);
   }
-}
-
-int lifeSupportRating(vector<int> *readings, int most_significan_bit) {
-  int co2_rating;
-  int o2_rating;
-  vector<int> ones;
-  vector<int> zeros; 
-  for (int reading : (*readings)) {
-    if (reading & (1 << most_significan_bit)) {
-      ones.push_back(reading);
-    } else {
-      zeros.push_back(reading);
-    }
-  }
-  if (ones.size() >= zeros.size()) {
-    o2_rating = (1 << most_significan_bit) | calculateO2Rating(&ones, most_significan_bit - 1);
-    co2_rating = (0 << most_significan_bit) | calculateCo2Rating(&zeros, most_significan_bit - 1);
-  } else {
-    o2_rating = (0 << most_significan_bit) | calculateO2Rating(&zeros, most_significan_bit - 1);
-    co2_rating = (1 << most_significan_bit) | calculateCo2Rating(&ones, most_significan_bit - 1);
-  }
-  return o2_rating * co2_rating;
 }
 
 int main() {
@@ -85,8 +51,17 @@ int main() {
   for (int i = 0; getline(cin, binary); i++) {
     readings.push_back(stoi(binary, nullptr, 2));
   }
+  int most_significan_bit = binary.size() - 1;
+  int co2_rating = calculateRating(
+      &readings, 
+      most_significan_bit, 
+      [](int ones_size, int zeros_size) { return ones_size < zeros_size; });
+  int o2_rating = calculateRating(
+      &readings, 
+      most_significan_bit, 
+      [](int ones_size, int zeros_size) { return ones_size >= zeros_size; });
 
-  printf("%d", lifeSupportRating(&readings, binary.size() - 1));
+  printf("%d", co2_rating * o2_rating);
 
   return 0;
 }
