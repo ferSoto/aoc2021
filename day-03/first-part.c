@@ -35,11 +35,7 @@ int main() {
       common_bit = calloc(binary_length, sizeof(int));
     }
     for (int j = 0; j < binary_length; j++) {
-      if (binary[j] == '1') {
-        common_bit[j] ++;
-      } else {
-        common_bit[j] --;
-      }
+      common_bit[j] += (binary[j] == '1') ? 1 : -1;
     }
   }
   Rate rate = calculateRate(common_bit, binary_length);
