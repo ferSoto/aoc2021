@@ -60,8 +60,7 @@ int main() {
       &readings, 
       most_significan_bit, 
       [](int ones_size, int zeros_size) { return ones_size >= zeros_size; });
-
-  printf("%d", co2_rating * o2_rating);
+  cout << co2_rating * o2_rating;
 
   return 0;
 }
