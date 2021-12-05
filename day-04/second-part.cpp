@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,20 +43,30 @@ vector<int> parseInput(string *input) {
   return parsed_input;
 }
 
-int markBoards(vector<Board> *boards, int n) {
+void updateCompletedBoards(set<int> *s, vector<int> *v) {
+  for (int n : (*v)) {
+    s->insert(n);
+  }
+}
+
+vector<int> markBoards(vector<Board> *boards, int n, set<int> completed_boards) {
+  vector<int> completed;
   for (int i = 0; i < boards->size(); i++) {
+    if (completed_boards.count(i)) {
+      continue;
+    }
     for (int j = 0; j < 5; j++) {
       for (int k = 0; k < 5; k++) {
         if (boards->at(i)[j][k] == n) {
           boards->at(i)[j][k] = -1;
           if ((++ boards->at(i)[5][k]) == 5 || (++ boards->at(i)[j][5]) == 5) {
-            return i;
+            completed.push_back(i);
           }
         }
       }
     }
   }
-  return -1;
+  return completed;;
 }
 
 int calculateScore(Board *b, int n) {
@@ -82,12 +93,17 @@ int main() {
     }
     boards[i / 25][i / 5 % 5][i % 5] = cell;
   }
-  for (int number : bingo_numbers) {
-    int completed = markBoards(&boards, number);
-    if (completed >= 0) {
-      cout << calculateScore(&boards[completed], number);
-      break;   
+  int last_completed_board;
+  int last_number_played;
+  set<int> completed_boards;
+  for (int i = 0; i < bingo_numbers.size(); i++) {
+    auto new_completed = markBoards(&boards, bingo_numbers[i], completed_boards);
+    if (!new_completed.empty()) {
+      updateCompletedBoards(&completed_boards, &new_completed);
+      last_number_played = bingo_numbers[i];
+      last_completed_board = new_completed.back();
     }
   }
+  cout << calculateScore(&boards[last_completed_board], last_number_played);
   return 0;
 }
