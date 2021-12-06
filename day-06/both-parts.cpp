@@ -34,7 +34,7 @@ vector<ul> *constructNextPopulation(vector<ul> *current_pop, vector<ul> *next_po
     return constructNextPopulation(next_pop, current_pop, remaining_days - 1);
 }
 
-unsigned long calculateNextPopulationSize(vector<ul> population, int remaining_days) {
+ul calculateNextPopulationSize(vector<ul> population, int remaining_days) {
     vector<ul> v1(population);
     vector<ul> v2(MAX_SPAWN, 0);
     vector<ul> *last_population = constructNextPopulation(&v1, &v2, remaining_days);
