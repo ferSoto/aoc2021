@@ -7,10 +7,10 @@ vector<string> parseInput(string *input) {
   size_t pos = 0;
   vector<string> segments;
   while ((pos = input->find(" ")) != string::npos) {
-    segments.push_back(stoi(input->substr(0, pos), nullptr));
+    segments.push_back(input->substr(0, pos));
     input->erase(0, pos + 1);
   }
-  segments.push_back(stoi((*input), nullptr));
+  segments.push_back((*input));
   return segments;
 }
 
@@ -20,7 +20,7 @@ int main() {
     while (getline(cin, line)) {
         auto segments = parseInput(&line);
         for (int i = 11; i < segments.size(); i++) {
-            unique_segments_count += (segments[i].length() < 5 || segments[i].lenght() > 6);
+            unique_segments_count += (segments[i].size() < 5 || segments[i].size() > 6);
         }
     }
     cout << unique_segments_count;
